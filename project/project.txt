@@ -1,0 +1,154 @@
+
+================
+	Analysis
+================
+
+The analysis tool must:
+
+    - Accept this password as input: 1Billion$ars
+
+	- Accept a year as input
+	
+	- Load the bracket for the specified year, parse all 64 teams, and store them in that year's table of teams:
+	
+		URL Examples:
+		
+			+ (2014) http://espn.go.com/mens-college-basketball/tournament/bracket/_/id/201422/2014-ncaa-mens-final-4-tournament
+			   ....                                                                       ^^     ^^
+			+ (2002) http://espn.go.com/mens-college-basketball/tournament/bracket/_/id/200222/2002-ncaa-mens-final-4-tournament
+
+		It appears that the entire bracket is a _single_ line of HTML!
+
+
+	=====
+	  Determine start of bracket
+
+	    <div id="bracket"
+
+	=====
+
+
+	=====
+	  Determine each winner and loser
+
+		Actual HTML of a single game with the winner on top in the first two rounds (2002):
+
+		    <dl id="match1" class="match round1 winnertop"><dt><b>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/150/duke-blue-devils" title="Duke">Duke</a></b><br/>16 <a href="http://espn.go.com/mens-college-basketball/team/_/id/2737/winthrop-eagles" title="Winthrop">Winthrop</a></dt><dd class="pointer" onclick="toGamePage(224000047,3);"><b>84</b><br/>37</dd></dl>
+
+		Which means, when the winner is on top, the top team can be derived from this pattern:
+
+            <dt><b>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/150/duke-blue-devils" title="Duke">Duke</a></b>
+
+        And the bottom team can be derived from this pattern (again, winner on top):
+
+            <br/>16 <a href="http://espn.go.com/mens-college-basketball/team/_/id/2737/winthrop-eagles" title="Winthrop">Winthrop</a></dt>
+
+
+        Actual HTML of a sweet sixteen game with the winner on bottom (2002):
+
+            <div id="match13" class="match round3 winnerbot"><dl><dt>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/150/duke-blue-devils" title="Duke">Duke</a><br/><b>5 <a href="http://espn.go.com/mens-college-basketball/team/_/id/84/indiana-hoosiers" title="Indiana">Indiana</a></b></dt><dd class="pointer" onclick="toGamePage(224000053,3);">73<br/><b>74</b></dd></dl></div>
+
+
+        =====
+
+        Actual HTML of a single game with the loser on top in the first two rounds (2014):
+
+            <dl id="match2" class="match round1 winnerbot"><dt>8 <a href="http://espn.go.com/mens-college-basketball/team/_/id/38/colorado-buffaloes" title="Colorado">Colorado</a><br/><b>9 <a href="http://espn.go.com/mens-college-basketball/team/_/id/221/pittsburgh-panthers" title="Pittsburgh">Pittsburgh</a></b></dt><dd class="pointer" onclick="toGamePage(400546916,3);">48<br/><b>77</b></dd></dl>
+
+        Which means, when the loser is on top, the top team can be derived from this pattern:
+
+            <dt>8 <a href="http://espn.go.com/mens-college-basketball/team/_/id/38/colorado-buffaloes" title="Colorado">Colorado</a>
+
+        And the bottom team can be derived from this pattern (again, loser on top):
+
+            <br/><b>9 <a href="http://espn.go.com/mens-college-basketball/team/_/id/221/pittsburgh-panthers" title="Pittsburgh">Pittsburgh</a></b></dt>
+
+
+        Actual HTML of a sweet sixteen game with the winner on top (2014):
+
+            <div id="match13" class="match round3 winnertop"><dl><dt><b>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/57/florida-gators" title="Florida">Florida</a></b><br/>4 <a href="http://espn.go.com/mens-college-basketball/team/_/id/26/ucla-bruins" title="UCLA">UCLA</a></dt><dd class="pointer" onclick="toGamePage(400548873,3);"><b>79</b><br/>68</dd></dl></div>
+
+
+    =====
+
+
+		NOTES:
+		
+			+ Each team's seed should be captured and stored during this step
+			
+			+ Once all 64 teams have been stored, the results of each game for the entire tournament should be stored
+	
+	- Load each team's "Schedule" page for the specified year, parse the following statistics, and store them in that team's row:
+	
+		+ 1PR (1-Point Ratio: number of 1-point games won / total number of 1-point games played)
+		+ 2PR (2-Point Ratio: number of 2-point games won / total number of 2-point games played)
+		+ 3PR (3-Point Ratio: number of 3-point games won / total number of 3-point games played)
+		+ RAC (Record Against Current: Their regular season record against the current team they're facing in the tournament)
+		+ OTR (Overtime Record: number of overtime games won / total number of overtime games played)
+		+ VAR (Victories Against Ranked: number of times they beat a ranked opponent)
+		+ CON (Conference) The following conferences have won championships recently:
+					American Athletic Conference - 2014, 2013, 2011, 2004
+					Southeastern Conference      - 2012, 2007, 2006
+					Atlantic Coast Conference    - 2010, 2009, 2005, 2003, 2002
+					Big 12 Conference            - 2008
+		
+		URL Examples:
+		
+			+ (2014) http://espn.go.com/mens-college-basketball/team/schedule?id=57&year=2014
+			   ....                                                                        ^^
+			+ (2002) http://espn.go.com/mens-college-basketball/team/schedule?id=57&year=2002
+	
+	- Load each team's "Statistics" page for the specified year, parse the following statistics, and store them in that team's row:
+	
+		+ PPG (Points Per Game)
+		+ APG (Assists Per Game)
+		+ SPG (Steals Per Game)
+		+ BPG (Blocks Per Game)
+		+ TPG (Turnovers Per Game)
+		+ FG% (Field Goal Percentage)
+		+ FT% (Free Throw Percentage)
+		+ 3P% (Three Point Percentage)
+		+ PTS (Points (total))
+		+ OFR (Offensive Rebounds (total))
+		+ DFR (Defensive Rebounds (total))
+		
+		URL Examples:
+		
+			+ (2014) http://espn.go.com/mens-college-basketball/team/stats/_/id/57/year/2014/florida-gators
+			   ....                                                                       ^^
+			+ (2002) http://espn.go.com/mens-college-basketball/team/stats/_/id/57/year/2002/florida-gators
+	
+	- Display a table of all the above statistics for each winning team (so there should be 63 rows). In each row, indicate whether
+	  the winning team was better or worse for each statistic. This *should* allow you to visually determine what the weight of each
+	  statistics should be, so that:
+	  
+	  	a) You can either win $1,000,000,000 or $100,000!
+	  	
+	  	b) You can provide true value to those who might pay to use the prognostication services provided by your site!
+
+
+==================
+	Prediction
+==================
+
+	- NOTE: Remember that you can get the Average Points Allowed for the current year -- and this will be a *nice* 20th stat to add!
+			However, this will mean loading and parsing the "Clubhouse" page instead of the "Statistics" page above (darn).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

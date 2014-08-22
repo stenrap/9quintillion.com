@@ -43,7 +43,7 @@ public class BracketServiceImpl implements BracketService {
                     Matcher bracketMatcher = bracketPattern.matcher(line);
                     if (bracketMatcher.matches()) {
                         // This gets the first two rounds of every region
-                        Pattern gamePattern = Pattern.compile(".*?<dl id=\"match\\d+\".*?<dt><?b?>?(?<firstSeed>\\d+) <a href=\"(?<firstTeamUrl>.*?)\" title=\"(?<firstTeamName>.*?)\".*?<br/><?b?>?(?<secondSeed>\\d+) <a href=\"(?<secondTeamUrl>.*?)\" title=\"(?<secondTeamName>.*?)\"");
+                        Pattern gamePattern = Pattern.compile(".*?<dl id=\"match\\d+\".*?<dt><?b?>?(?<firstSeed>\\d+) <a href=\"(?<firstTeamUrl>.*?)\" title=\"(?<firstTeamName>.*?)\".*?<br/><?b?>?(?<secondSeed>\\d+) <a href=\"(?<secondTeamUrl>.*?)\" title=\"(?<secondTeamName>.*?)\".*?>(?<firstTeamScore>\\d+)<.*?>(?<secondTeamScore>\\d+)<");
                         Matcher gameMatcher = gamePattern.matcher(line);
                         while (gameMatcher.find()
                                 && gameMatcher.group("firstSeed") != null
@@ -51,18 +51,27 @@ public class BracketServiceImpl implements BracketService {
                                 && gameMatcher.group("firstTeamName") != null
                                 && gameMatcher.group("secondSeed") != null
                                 && gameMatcher.group("secondTeamUrl") != null
-                                && gameMatcher.group("secondTeamName") != null) {
+                                && gameMatcher.group("secondTeamName") != null
+                                && gameMatcher.group("firstTeamScore") != null
+                                && gameMatcher.group("secondTeamScore") != null) {
                             log.debug("Found the first seed: {}", gameMatcher.group("firstSeed"));
                             log.debug("Found the first team URL: {}", gameMatcher.group("firstTeamUrl"));
                             log.debug("Found the first team name: {}", gameMatcher.group("firstTeamName"));
                             log.debug("Found the second seed: {}", gameMatcher.group("secondSeed"));
                             log.debug("Found the second team URL: {}", gameMatcher.group("secondTeamUrl"));
-                            log.debug("Found the second team name: {}\n", gameMatcher.group("secondTeamName"));
+                            log.debug("Found the second team name: {}", gameMatcher.group("secondTeamName"));
+                            log.debug("Found the first team score: {}", gameMatcher.group("firstTeamScore"));
+                            log.debug("Found the second team score: {}\n", gameMatcher.group("secondTeamScore"));
                         }
-                        // NOTE: At this point, if makePrediction is true, you can start making the prediction
 
-                        // This gets the sweet sixteen?
-                        
+                        // NOTE: At this point, if makePrediction is true, you can start making the prediction
+                        if (makePrediction) {
+
+                        } else {
+                            // This gets the sweet sixteen?
+
+                        }
+
                     }
                 }
             }

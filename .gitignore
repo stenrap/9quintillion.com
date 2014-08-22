@@ -1,6 +1,5 @@
 .DS_Store
 Thumbs.db
-project.txt
 target/**
 .idea/**
 *.iml
