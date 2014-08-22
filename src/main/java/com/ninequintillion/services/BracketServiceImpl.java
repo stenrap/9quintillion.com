@@ -61,7 +61,8 @@ public class BracketServiceImpl implements BracketService {
                         }
                         // NOTE: At this point, if makePrediction is true, you can start making the prediction
 
-                        // This gets the sweet sixteen
+                        // This gets the sweet sixteen?
+                        
                     }
                 }
             }
