@@ -42,16 +42,26 @@ public class BracketServiceImpl implements BracketService {
                     Pattern bracketPattern = Pattern.compile(".*<div id=\"bracket\".*");
                     Matcher bracketMatcher = bracketPattern.matcher(line);
                     if (bracketMatcher.matches()) {
-//                        log.debug("Found the bracket: {}", line);
-                        Pattern gamePattern = Pattern.compile(".*?<dl id=\"match\\d+\".*?<dt><?b?>?(?<firstSeed>\\d+) <a href=\"(?<firstTeamUrl>.+?)\" title=");
+                        // This gets the first two rounds of every region
+                        Pattern gamePattern = Pattern.compile(".*?<dl id=\"match\\d+\".*?<dt><?b?>?(?<firstSeed>\\d+) <a href=\"(?<firstTeamUrl>.*?)\" title=\"(?<firstTeamName>.*?)\".*?<br/><?b?>?(?<secondSeed>\\d+) <a href=\"(?<secondTeamUrl>.*?)\" title=\"(?<secondTeamName>.*?)\"");
                         Matcher gameMatcher = gamePattern.matcher(line);
-                        // TODO: Obviously the call to find() must be in a loop. (Should it execute 63 times, or will some of the games have a different pattern?)
-                        if (gameMatcher.find()
+                        while (gameMatcher.find()
                                 && gameMatcher.group("firstSeed") != null
-                                && gameMatcher.group("firstTeamUrl") != null) {
+                                && gameMatcher.group("firstTeamUrl") != null
+                                && gameMatcher.group("firstTeamName") != null
+                                && gameMatcher.group("secondSeed") != null
+                                && gameMatcher.group("secondTeamUrl") != null
+                                && gameMatcher.group("secondTeamName") != null) {
                             log.debug("Found the first seed: {}", gameMatcher.group("firstSeed"));
                             log.debug("Found the first team URL: {}", gameMatcher.group("firstTeamUrl"));
+                            log.debug("Found the first team name: {}", gameMatcher.group("firstTeamName"));
+                            log.debug("Found the second seed: {}", gameMatcher.group("secondSeed"));
+                            log.debug("Found the second team URL: {}", gameMatcher.group("secondTeamUrl"));
+                            log.debug("Found the second team name: {}\n", gameMatcher.group("secondTeamName"));
                         }
+                        // NOTE: At this point, if makePrediction is true, you can start making the prediction
+
+                        // This gets the sweet sixteen
                     }
                 }
             }
