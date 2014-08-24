@@ -26,6 +26,7 @@ public class Team {
     private int tiesAgainstCurrent;
     private int gamesAgainstRanked;
     private int winsAgainstRanked;
+    private double averagePointsAllowed;
     private String conference;
 
     /* Derived From Statistics Page */
