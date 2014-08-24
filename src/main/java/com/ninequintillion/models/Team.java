@@ -1,0 +1,44 @@
+package com.ninequintillion.models;
+
+import lombok.Data;
+
+import java.net.URL;
+
+@Data
+public class Team {
+
+    /* Derived From Bracket */
+    private final String name;
+    private final int seed;
+    private final URL url;
+
+    /* Derived From Schedule Page */
+    private int onePointGamesPlayed;
+    private int onePointGamesWon;
+    private int twoPointGamesPlayed;
+    private int twoPointGamesWon;
+    private int threePointGamesPlayed;
+    private int threePointGamesWon;
+    private int overtimeGamesPlayed;
+    private int overtimeGamesWon;
+    private int winsAgainstCurrent;
+    private int lossesAgainstCurrent;
+    private int tiesAgainstCurrent;
+    private int gamesAgainstRanked;
+    private int winsAgainstRanked;
+    private String conference;
+
+    /* Derived From Statistics Page */
+    private double pointsPerGame;
+    private double assistsPerGame;
+    private double stealsPerGame;
+    private double blocksPerGame;
+    private double turnoversPerGame;
+    private double fieldGoalPercentage;
+    private double freeThrowPercentage;
+    private double threePointPercentage;
+    private int totalPoints;
+    private int totalOffensiveRebounds;
+    private int totalDefensiveRebounds;
+
+}

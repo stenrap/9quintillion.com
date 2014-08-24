@@ -21,6 +21,7 @@ The analysis tool must:
 
 
 	=====
+
 	  Determine start of bracket
 
 	    <div id="bracket"
@@ -29,13 +30,16 @@ The analysis tool must:
 
 
 	=====
+
 	  Determine each winner and loser
+
+	    =====
 
 		Actual HTML of a single game with the winner on top in the first two rounds (2002):
 
 		    <dl id="match1" class="match round1 winnertop"><dt><b>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/150/duke-blue-devils" title="Duke">Duke</a></b><br/>16 <a href="http://espn.go.com/mens-college-basketball/team/_/id/2737/winthrop-eagles" title="Winthrop">Winthrop</a></dt><dd class="pointer" onclick="toGamePage(224000047,3);"><b>84</b><br/>37</dd></dl>
 
-		Which means, when the winner is on top, the top team can be derived from this pattern:
+		Which means when the winner is on top, the top team can be derived from this pattern:
 
             <dt><b>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/150/duke-blue-devils" title="Duke">Duke</a></b>
 
@@ -43,19 +47,13 @@ The analysis tool must:
 
             <br/>16 <a href="http://espn.go.com/mens-college-basketball/team/_/id/2737/winthrop-eagles" title="Winthrop">Winthrop</a></dt>
 
-
-        Actual HTML of a sweet sixteen game with the winner on bottom (2002):
-
-            <div id="match13" class="match round3 winnerbot"><dl><dt>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/150/duke-blue-devils" title="Duke">Duke</a><br/><b>5 <a href="http://espn.go.com/mens-college-basketball/team/_/id/84/indiana-hoosiers" title="Indiana">Indiana</a></b></dt><dd class="pointer" onclick="toGamePage(224000053,3);">73<br/><b>74</b></dd></dl></div>
-
-
         =====
 
         Actual HTML of a single game with the loser on top in the first two rounds (2014):
 
             <dl id="match2" class="match round1 winnerbot"><dt>8 <a href="http://espn.go.com/mens-college-basketball/team/_/id/38/colorado-buffaloes" title="Colorado">Colorado</a><br/><b>9 <a href="http://espn.go.com/mens-college-basketball/team/_/id/221/pittsburgh-panthers" title="Pittsburgh">Pittsburgh</a></b></dt><dd class="pointer" onclick="toGamePage(400546916,3);">48<br/><b>77</b></dd></dl>
 
-        Which means, when the loser is on top, the top team can be derived from this pattern:
+        Which means when the loser is on top, the top team can be derived from this pattern:
 
             <dt>8 <a href="http://espn.go.com/mens-college-basketball/team/_/id/38/colorado-buffaloes" title="Colorado">Colorado</a>
 
@@ -63,11 +61,15 @@ The analysis tool must:
 
             <br/><b>9 <a href="http://espn.go.com/mens-college-basketball/team/_/id/221/pittsburgh-panthers" title="Pittsburgh">Pittsburgh</a></b></dt>
 
+        =====
 
-        Actual HTML of a sweet sixteen game with the winner on top (2014):
+        Actual HTML of the remaining games (sweet sixteen, elite eight, final four, championship) with the loser on top (2002):
+
+            <div id="match13" class="match round3 winnerbot"><dl><dt>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/150/duke-blue-devils" title="Duke">Duke</a><br/><b>5 <a href="http://espn.go.com/mens-college-basketball/team/_/id/84/indiana-hoosiers" title="Indiana">Indiana</a></b></dt><dd class="pointer" onclick="toGamePage(224000053,3);">73<br/><b>74</b></dd></dl></div>
+
+        Actual HTML of the remaining games (sweet sixteen, elite eight, final four, championship) with the winner on top (2014):
 
             <div id="match13" class="match round3 winnertop"><dl><dt><b>1 <a href="http://espn.go.com/mens-college-basketball/team/_/id/57/florida-gators" title="Florida">Florida</a></b><br/>4 <a href="http://espn.go.com/mens-college-basketball/team/_/id/26/ucla-bruins" title="UCLA">UCLA</a></dt><dd class="pointer" onclick="toGamePage(400548873,3);"><b>79</b><br/>68</dd></dl></div>
-
 
     =====
 

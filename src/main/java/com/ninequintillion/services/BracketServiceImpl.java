@@ -1,6 +1,7 @@
 package com.ninequintillion.services;
 
 import com.ninequintillion.models.BracketModel;
+import com.ninequintillion.models.Team;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,6 +14,10 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +25,8 @@ import java.util.regex.Pattern;
 public class BracketServiceImpl implements BracketService {
 
     private final Logger log = LoggerFactory.getLogger(BracketServiceImpl.class);
+    private List<Team> teamList = new ArrayList<Team>();
+    private Map<String, Team> teamMap = new HashMap<String, Team>();
 
     @Override
     public BracketModel parseBracket(String year, boolean makePrediction) {
@@ -42,8 +49,8 @@ public class BracketServiceImpl implements BracketService {
                     Pattern bracketPattern = Pattern.compile(".*<div id=\"bracket\".*");
                     Matcher bracketMatcher = bracketPattern.matcher(line);
                     if (bracketMatcher.matches()) {
-                        // This gets the first two rounds of every region
-                        Pattern gamePattern = Pattern.compile(".*?<dl id=\"match\\d+\".*?<dt><?b?>?(?<firstSeed>\\d+) <a href=\"(?<firstTeamUrl>.*?)\" title=\"(?<firstTeamName>.*?)\".*?<br/><?b?>?(?<secondSeed>\\d+) <a href=\"(?<secondTeamUrl>.*?)\" title=\"(?<secondTeamName>.*?)\".*?>(?<firstTeamScore>\\d+)<.*?>(?<secondTeamScore>\\d+)<");
+                        // This regex gets every game in the entire bracket!
+                        Pattern gamePattern = Pattern.compile(".*?<(dl|div) id=\"match\\d+\".*?<dt><?b?>?(?<firstSeed>\\d+) <a href=\"(?<firstTeamUrl>.*?)\" title=\"(?<firstTeamName>.*?)\".*?<br/><?b?>?(?<secondSeed>\\d+) <a href=\"(?<secondTeamUrl>.*?)\" title=\"(?<secondTeamName>.*?)\".*?>(?<firstTeamScore>\\d+)<.*?>(?<secondTeamScore>\\d+)<");
                         Matcher gameMatcher = gamePattern.matcher(line);
                         while (gameMatcher.find()
                                 && gameMatcher.group("firstSeed") != null
@@ -54,6 +61,10 @@ public class BracketServiceImpl implements BracketService {
                                 && gameMatcher.group("secondTeamName") != null
                                 && gameMatcher.group("firstTeamScore") != null
                                 && gameMatcher.group("secondTeamScore") != null) {
+
+                            // WYLO: Populate the team map with the URL string as the key and a Team instance as the value.
+                            //       Note that the scores won't be available for prediction, and that prediction will be based on the database anyway!!!
+
                             log.debug("Found the first seed: {}", gameMatcher.group("firstSeed"));
                             log.debug("Found the first team URL: {}", gameMatcher.group("firstTeamUrl"));
                             log.debug("Found the first team name: {}", gameMatcher.group("firstTeamName"));
@@ -69,7 +80,7 @@ public class BracketServiceImpl implements BracketService {
 
                         } else {
                             // This gets the sweet sixteen?
-
+//                            Pattern sweetSixteenGamePattern = Pattern.compile(".*?");
                         }
 
                     }
