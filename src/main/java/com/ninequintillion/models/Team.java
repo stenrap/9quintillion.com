@@ -8,9 +8,9 @@ import java.net.URL;
 public class Team {
 
     /* Derived From Bracket */
-    private final String name;
     private final int seed;
-    private final URL url;
+    private final int id;
+    private final String name;
 
     /* Derived From Schedule Page */
     private int onePointGamesPlayed;

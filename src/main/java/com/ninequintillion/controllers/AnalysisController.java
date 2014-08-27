@@ -1,5 +1,6 @@
 package com.ninequintillion.controllers;
 
+import com.ninequintillion.exceptions.BracketAnalysisException;
 import com.ninequintillion.models.BracketModel;
 import com.ninequintillion.models.StartAnalysisModel;
 import com.ninequintillion.services.BracketService;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,7 +30,7 @@ public class AnalysisController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ModelAndView startAnalysis(StartAnalysisModel startAnalysisModel, BindingResult result) {
+    public ModelAndView startAnalysis(StartAnalysisModel startAnalysisModel, BindingResult result) throws BracketAnalysisException{
         if (result.hasErrors()) {
             return new ModelAndView("redirect:/analysis");
         }
@@ -40,6 +42,11 @@ public class AnalysisController {
         ModelAndView modelAndView = new ModelAndView("analysis/result");
         modelAndView.addObject("result", startAnalysisModel);
         return modelAndView;
+    }
+
+    @ExceptionHandler(BracketAnalysisException.class)
+    public String handleException() {
+        return "analysis/error"; // TODO: Make this view
     }
 
 }
