@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
+
 @Controller
 @RequestMapping(value = "/analysis")
 public class AnalysisController {
@@ -30,7 +32,7 @@ public class AnalysisController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ModelAndView startAnalysis(StartAnalysisModel startAnalysisModel, BindingResult result) throws BracketAnalysisException{
+    public ModelAndView startAnalysis(StartAnalysisModel startAnalysisModel, BindingResult result) throws BracketAnalysisException, IOException {
         if (result.hasErrors()) {
             return new ModelAndView("redirect:/analysis");
         }
@@ -48,5 +50,7 @@ public class AnalysisController {
     public String handleException() {
         return "analysis/error"; // TODO: Make this view
     }
+
+    // TODO: Figure out what to do about IOException from bracket analysis, which are currently unhandled
 
 }

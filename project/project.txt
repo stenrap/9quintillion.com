@@ -74,21 +74,17 @@ The analysis tool must:
     =====
 
 
-		NOTES:
-		
-			+ Each team's seed should be captured and stored during this step
-			
-			+ Once all 64 teams have been stored, the results of each game for the entire tournament should be stored
-	
 	- Load each team's "Schedule" page for the specified year, parse the following statistics, and store them in that team's row:
 	
+		+ VAR (Victories Against Ranked: number of times they beat a ranked opponent)
 		+ 1PR (1-Point Ratio: number of 1-point games won / total number of 1-point games played)
 		+ 2PR (2-Point Ratio: number of 2-point games won / total number of 2-point games played)
 		+ 3PR (3-Point Ratio: number of 3-point games won / total number of 3-point games played)
 		+ RAC (Record Against Current: Their regular season record against the current team they're facing in the tournament)
 		+ OTR (Overtime Record: number of overtime games won / total number of overtime games played)
-		+ VAR (Victories Against Ranked: number of times they beat a ranked opponent)
-		+ APA (Average Points Allowed)
+		+ APA (Average Points Allowed ... this will require a little math)
+		+ WIN (Number of wins)
+		+ LOS (Number of losses)
 		+ CON (Conference) The following conferences have won championships recently:
 					American Athletic Conference - 2014, 2013, 2011, 2004
 					Southeastern Conference      - 2012, 2007, 2006
@@ -100,6 +96,20 @@ The analysis tool must:
 			+ (2014) http://espn.go.com/mens-college-basketball/team/schedule?id=57&year=2014
 			   ....                                                                        ^^
 			+ (2002) http://espn.go.com/mens-college-basketball/team/schedule?id=57&year=2002
+
+
+	====
+
+        Actual HTML of an odd row in the schedule:
+
+            <tr class="oddrow team-41-218"><td>Thu, Nov 8</td><td align="left"><ul class="game-schedule"><li class="game-status">vs</li><li class="team-logo-small logo-ncaa-small ncaa-small-218"><a href="http://espn.go.com/mens-college-basketball/team/_/id/218/temple-owls"></a></li><li class="team-name">#16 <a href="http://espn.go.com/mens-college-basketball/team/_/id/218/temple-owls">Temple</a></li></ul></td><td><ul class="game-schedule"><li class="game-status win"><span class="greenfont">W</span></li><li class="score"><a href="/ncb/conversation?gameId=213120057">72-64</a></li></ul></td><td>1-0 (0-0)</td></tr>
+
+        Actual HTML of an even row in the schedule:
+
+            <tr class="evenrow team-41-52"><td>Fri, Nov 16</td><td align="left"><ul class="game-schedule"><li class="game-status">vs</li><li class="team-logo-small logo-ncaa-small ncaa-small-52"><a href="http://espn.go.com/mens-college-basketball/team/_/id/52/florida-state-seminoles"></a></li><li class="team-name"><a href="http://espn.go.com/mens-college-basketball/team/_/id/52/florida-state-seminoles">Florida State</a></li></ul></td><td><ul class="game-schedule"><li class="game-status win"><span class="greenfont">W</span></li><li class="score"><a href="/ncb/conversation?gameId=213200057">68-47</a></li></ul></td><td>2-0 (0-0)</td></tr>
+
+	====
+
 	
 	- Load each team's "Statistics" page for the specified year, parse the following statistics, and store them in that team's row:
 	
