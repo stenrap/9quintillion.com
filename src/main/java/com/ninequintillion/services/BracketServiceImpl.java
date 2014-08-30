@@ -128,12 +128,11 @@ public class BracketServiceImpl implements BracketService {
                 throw new BracketAnalysisException("Error getting bracket response entity.");
             }
 
-            // WYLO ... The code below (looping over the map) works. However, it can't help you find the record against the current opponent in the tournament.
-            //          In other words, it might be best to loop over the gameList...but you'll somehow need to avoid multiple GET requests for every team
-            //          that won multiple games in the tournament...(Should each team instance store its entire regular season?)
-
             // Load each team's "Schedule" page and gather the stats available thereon
-            for (Team team : teamMap.values()) {
+            for (Game tournamentGame : gameList) {
+
+                // WYLO ... Load the first team's schedule page and get all its stats, then load the second team's schedule page and get all its stats...
+
                 log.debug("Loading {}'s schedule page", team.getName());
                 response.close();
                 bufferedReader.close();
@@ -151,12 +150,12 @@ public class BracketServiceImpl implements BracketService {
                         Matcher gameRowMatcher = gameRowPattern.matcher(line);
                         if (gameRowMatcher.matches()) {
                             // This regex gets every game row
-                            Pattern scheduleGamePattern = Pattern.compile("class=\"team-name\">#(?<opponentRank>\\d+) ");
-                            Matcher scheduleGameMatcher = scheduleGamePattern.matcher(line);
+                            Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">#(?<opponentRank>\\d+) ");
+                            Matcher regularSeasonGameMatcher = regularSeasonGamePattern.matcher(line);
 
-                            while (scheduleGameMatcher.find()) {
-                                if (scheduleGameMatcher.group("opponentRank") != null) {
-                                    log.debug("{} played a ranked opponent: {}", team.getName(), scheduleGameMatcher.group("opponentRank"));
+                            while (regularSeasonGameMatcher.find()) {
+                                if (regularSeasonGameMatcher.group("opponentRank") != null) {
+                                    log.debug("{} played a ranked opponent: {}", team.getName(), regularSeasonGameMatcher.group("opponentRank"));
                                 }
                             }
                         }

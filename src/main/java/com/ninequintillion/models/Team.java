@@ -3,6 +3,7 @@ package com.ninequintillion.models;
 import lombok.Data;
 
 import java.net.URL;
+import java.util.Map;
 
 @Data
 public class Team {
@@ -13,6 +14,7 @@ public class Team {
     private final String name;
 
     /* Derived From Schedule Page */
+    private Map<Integer, RegularSeasonGame> schedule;
     private int onePointGamesPlayed;
     private int onePointGamesWon;
     private int twoPointGamesPlayed;
