@@ -3,6 +3,7 @@ package com.ninequintillion.services;
 import com.ninequintillion.exceptions.BracketAnalysisException;
 import com.ninequintillion.models.BracketModel;
 import com.ninequintillion.models.Game;
+import com.ninequintillion.models.RegularSeasonGame;
 import com.ninequintillion.models.Team;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -28,17 +29,22 @@ import java.util.regex.Pattern;
 public class BracketServiceImpl implements BracketService {
 
     private final Logger log = LoggerFactory.getLogger(BracketServiceImpl.class);
+
+    private String year;
+    private CloseableHttpClient client;
+    private HttpGet get;
+    private CloseableHttpResponse response;
+    private HttpEntity entity;
+    private BufferedReader bufferedReader;
+    private String line;
     private List<Game> gameList = new ArrayList<>();
     private Map<Integer, Team> teamMap = new HashMap<>();
 
     @Override
     public BracketModel parseBracket(String year, boolean makePrediction) throws BracketAnalysisException, IOException {
-        CloseableHttpClient client = HttpClients.createDefault();
-        HttpGet get = new HttpGet("http://espn.go.com/mens-college-basketball/tournament/bracket/_/id/"+year+"22/"+year+"-ncaa-mens-final-4-tournament");
-        CloseableHttpResponse response = null;
-        HttpEntity entity = null;
-        BufferedReader bufferedReader = null;
-        String line = null;
+        this.year = year;
+        client = HttpClients.createDefault();
+        get = new HttpGet("http://espn.go.com/mens-college-basketball/tournament/bracket/_/id/"+year+"22/"+year+"-ncaa-mens-final-4-tournament");
         BracketModel bracketModel = new BracketModel();
 
         try {
@@ -46,7 +52,6 @@ public class BracketServiceImpl implements BracketService {
             entity = response.getEntity();
             if (entity != null) {
                 bufferedReader = new BufferedReader(new InputStreamReader(entity.getContent()));
-                int gameCount = 0;
                 while (true) {
                     line = bufferedReader.readLine();
                     if (line == null) {
@@ -88,40 +93,45 @@ public class BracketServiceImpl implements BracketService {
                                 throw new BracketAnalysisException("Error finding team id.");
                             }
 
-                            int seed = Integer.parseInt(gameMatcher.group("firstSeed"));
-                            int id = Integer.parseInt(firstUrlMatcher.group("id"));
-                            String name = gameMatcher.group("firstName");
-                            Team firstTeam  = new Team(seed, id, name);
+                            int firstTeamSeed    = Integer.parseInt(gameMatcher.group("firstSeed"));
+                            int firstTeamId      = Integer.parseInt(firstUrlMatcher.group("id"));
+                            String firstTeamName = gameMatcher.group("firstName");
 
 //                            log.debug("Found the first id: {}", id);
 
-                            seed = Integer.parseInt(gameMatcher.group("secondSeed"));
-                            id = Integer.parseInt(secondUrlMatcher.group("id"));
-                            name = gameMatcher.group("secondName");
-                            Team secondTeam = new Team(seed, id, name);
+                            int secondTeamSeed    = Integer.parseInt(gameMatcher.group("secondSeed"));
+                            int secondTeamId      = Integer.parseInt(secondUrlMatcher.group("id"));
+                            String secondTeamName = gameMatcher.group("secondName");
+
+                            Team firstTeam;
+                            Team secondTeam;
 
 //                            log.debug("Found the second id: {}\n", id);
 
-                            if (teamMap.get(firstTeam.getId()) == null) {
-                                teamMap.put(firstTeam.getId(), firstTeam);
+                            if (teamMap.get(firstTeamId) == null) {
+                                firstTeam = new Team(firstTeamSeed, firstTeamId, firstTeamName);
+                                teamMap.put(firstTeamId, firstTeam);
+                            } else {
+                                firstTeam = teamMap.get(firstTeamId);
                             }
 
-                            if (teamMap.get(secondTeam.getId()) == null) {
-                                teamMap.put(secondTeam.getId(), secondTeam);
+                            if (teamMap.get(secondTeamId) == null) {
+                                secondTeam = new Team(secondTeamSeed, secondTeamId, secondTeamName);
+                                teamMap.put(secondTeamId, secondTeam);
+                            } else {
+                                secondTeam = teamMap.get(secondTeamId);
                             }
 
                             Team winningTeam = Integer.parseInt(gameMatcher.group("firstScore")) > Integer.parseInt(gameMatcher.group("secondScore")) ? firstTeam : secondTeam;
 
                             gameList.add(new Game(firstTeam, secondTeam, winningTeam));
-
-                            gameCount++;
                         }
 
                         break;
                     }
                 }
 
-                if (gameCount != 63) {
+                if (gameList.size() != 63) {
                     throw new BracketAnalysisException("Error finding team.");
                 }
             } else {
@@ -130,40 +140,12 @@ public class BracketServiceImpl implements BracketService {
 
             // Load each team's "Schedule" page and gather the stats available thereon
             for (Game tournamentGame : gameList) {
-
-                // WYLO ... Load the first team's schedule page and get all its stats, then load the second team's schedule page and get all its stats...
-
-                log.debug("Loading {}'s schedule page", team.getName());
-                response.close();
-                bufferedReader.close();
-                get = new HttpGet("http://espn.go.com/mens-college-basketball/team/schedule?id="+team.getId()+"&year="+year);
-                response = client.execute(get);
-                entity = response.getEntity();
-                if (entity != null) {
-                    bufferedReader = new BufferedReader(new InputStreamReader(entity.getContent()));
-                    while (true) {
-                        line = bufferedReader.readLine();
-                        if (line == null) {
-                            break;
-                        }
-                        Pattern gameRowPattern = Pattern.compile(".*?tr class=\"oddrow .*");
-                        Matcher gameRowMatcher = gameRowPattern.matcher(line);
-                        if (gameRowMatcher.matches()) {
-                            // This regex gets every game row
-                            Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">#(?<opponentRank>\\d+) ");
-                            Matcher regularSeasonGameMatcher = regularSeasonGamePattern.matcher(line);
-
-                            while (regularSeasonGameMatcher.find()) {
-                                if (regularSeasonGameMatcher.group("opponentRank") != null) {
-                                    log.debug("{} played a ranked opponent: {}", team.getName(), regularSeasonGameMatcher.group("opponentRank"));
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    throw new BracketAnalysisException("Error getting bracket response entity.");
+                if (tournamentGame.getFirstTeam().getSchedule() == null) {
+                    getSchedulePage(tournamentGame.getFirstTeam());
                 }
-                log.debug("\n\n ===== Next Team ===== \n");
+                if (tournamentGame.getSecondTeam().getSchedule() == null) {
+                    getSchedulePage(tournamentGame.getSecondTeam());
+                }
             }
         } finally {
             if (response != null) {
@@ -173,6 +155,45 @@ public class BracketServiceImpl implements BracketService {
         }
 
         return bracketModel;
+    }
+
+    private void getSchedulePage(Team team) throws BracketAnalysisException, IOException {
+        team.setSchedule(new HashMap<Integer, RegularSeasonGame>());
+        log.debug("Loading {}'s schedule page", team.getName());
+        response.close();
+        bufferedReader.close();
+        get = new HttpGet("http://espn.go.com/mens-college-basketball/team/schedule?id="+team.getId()+"&year="+year);
+        response = client.execute(get);
+        entity = response.getEntity();
+        if (entity != null) {
+            bufferedReader = new BufferedReader(new InputStreamReader(entity.getContent()));
+            while (true) {
+                line = bufferedReader.readLine();
+                if (line == null) {
+                    break;
+                }
+                // This regex finds the very first odd row (but all the games are in a single HTML line, so this is the beginning of the schedule)
+                Pattern gameRowPattern = Pattern.compile(".*?tr class=\"oddrow .*");
+                Matcher gameRowMatcher = gameRowPattern.matcher(line);
+                if (gameRowMatcher.matches()) {
+                    // This regex gets every game row
+                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+)/");
+                    Matcher regularSeasonGameMatcher = regularSeasonGamePattern.matcher(line);
+
+                    while (regularSeasonGameMatcher.find()) {
+                        if (regularSeasonGameMatcher.group("opponentRank") != null) {
+//                            log.debug("{} played a ranked opponent: {}", team.getName(), regularSeasonGameMatcher.group("opponentRank"));
+                        }
+                        if (regularSeasonGameMatcher.group("opponentId") != null) {
+//                            log.debug("{} played against team: {}", team.getName(), regularSeasonGameMatcher.group("opponentId"));
+                        }
+                    }
+                }
+            }
+        } else {
+            throw new BracketAnalysisException("Error getting bracket response entity.");
+        }
+        log.debug("\n\n ===== Next Team ===== \n");
     }
 
 }
