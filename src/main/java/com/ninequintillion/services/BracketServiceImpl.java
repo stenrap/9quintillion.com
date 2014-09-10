@@ -37,11 +37,13 @@ public class BracketServiceImpl implements BracketService {
     private HttpEntity entity;
     private BufferedReader bufferedReader;
     private String line;
-    private List<Game> gameList = new ArrayList<>();
-    private Map<Integer, Team> teamMap = new HashMap<>();
+    private List<Game> gameList;
+    private Map<Integer, Team> teamMap;
 
     @Override
     public BracketModel parseBracket(String year, boolean makePrediction) throws BracketAnalysisException, IOException {
+        gameList = new ArrayList<>();
+        teamMap = new HashMap<>();
         this.year = year;
         client = HttpClients.createDefault();
         get = new HttpGet("http://espn.go.com/mens-college-basketball/tournament/bracket/_/id/"+year+"22/"+year+"-ncaa-mens-final-4-tournament");
@@ -159,7 +161,7 @@ public class BracketServiceImpl implements BracketService {
 
     private void getSchedulePage(Team team) throws BracketAnalysisException, IOException {
         team.setSchedule(new HashMap<Integer, RegularSeasonGame>());
-        log.debug("Loading {}'s schedule page", team.getName());
+//        log.debug("Loading {}'s schedule page", team.getName());
         response.close();
         bufferedReader.close();
         get = new HttpGet("http://espn.go.com/mens-college-basketball/team/schedule?id="+team.getId()+"&year="+year);
@@ -177,15 +179,18 @@ public class BracketServiceImpl implements BracketService {
                 Matcher gameRowMatcher = gameRowPattern.matcher(line);
                 if (gameRowMatcher.matches()) {
                     // This regex gets every game row
-                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+)/");
+                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+).*?font\">(?<outcome>W|L)<");
                     Matcher regularSeasonGameMatcher = regularSeasonGamePattern.matcher(line);
 
                     while (regularSeasonGameMatcher.find()) {
                         if (regularSeasonGameMatcher.group("opponentRank") != null) {
-//                            log.debug("{} played a ranked opponent: {}", team.getName(), regularSeasonGameMatcher.group("opponentRank"));
+                            log.debug("{} played a ranked opponent: {}", team.getName(), regularSeasonGameMatcher.group("opponentRank"));
                         }
                         if (regularSeasonGameMatcher.group("opponentId") != null) {
-//                            log.debug("{} played against team: {}", team.getName(), regularSeasonGameMatcher.group("opponentId"));
+                            log.debug("{} played against team: {}", team.getName(), regularSeasonGameMatcher.group("opponentId"));
+                        }
+                        if (regularSeasonGameMatcher.group("outcome") != null) {
+                            log.debug("{} chalked up a {}", team.getName(), regularSeasonGameMatcher.group("outcome"));
                         }
                     }
                 }

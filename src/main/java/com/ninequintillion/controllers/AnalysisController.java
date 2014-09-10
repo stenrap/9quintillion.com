@@ -47,7 +47,7 @@ public class AnalysisController {
     }
 
     @ExceptionHandler(BracketAnalysisException.class)
-    public String handleException() {
+    public String handleException(Exception e) {
         return "analysis/error"; // TODO: Make this view
     }
 
