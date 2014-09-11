@@ -179,20 +179,43 @@ public class BracketServiceImpl implements BracketService {
                 Matcher gameRowMatcher = gameRowPattern.matcher(line);
                 if (gameRowMatcher.matches()) {
                     // This regex gets every game row
-                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+).*?font\">(?<outcome>W|L)<");
+                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+).*?font\">(?<outcome>W|L)<.*?\">(?<winningScore>\\d+)-(?<losingScore>\\d+)<? ?\\d?(?<overtime>OT)?");
                     Matcher regularSeasonGameMatcher = regularSeasonGamePattern.matcher(line);
 
                     while (regularSeasonGameMatcher.find()) {
+                        if (regularSeasonGameMatcher.group("opponentId")          == null
+                                || regularSeasonGameMatcher.group("outcome")      == null
+                                || regularSeasonGameMatcher.group("winningScore") == null
+                                || regularSeasonGameMatcher.group("losingScore")  == null) {
+                            throw new BracketAnalysisException("Error loading team schedule.");
+                        }
+
+                        int opponentId   = Integer.parseInt(regularSeasonGameMatcher.group("opponentId"));
+                        boolean won      = regularSeasonGameMatcher.group("outcome").equalsIgnoreCase("w");
+                        int winningScore = Integer.parseInt(regularSeasonGameMatcher.group("winningScore"));
+                        int losingScore  = Integer.parseInt(regularSeasonGameMatcher.group("losingScore"));
+
+                        // Victories Against Ranked
                         if (regularSeasonGameMatcher.group("opponentRank") != null) {
-                            log.debug("{} played a ranked opponent: {}", team.getName(), regularSeasonGameMatcher.group("opponentRank"));
+                            team.setGamesAgainstRanked(team.getGamesAgainstRanked() + 1);
+                            if (won) {
+                                team.setWinsAgainstRanked(team.getWinsAgainstRanked() + 1);
+                            }
                         }
-                        if (regularSeasonGameMatcher.group("opponentId") != null) {
-                            log.debug("{} played against team: {}", team.getName(), regularSeasonGameMatcher.group("opponentId"));
+
+                        // 1-Point Victories
+                        if (winningScore - losingScore == 1) {
+                            team.setOnePointGamesPlayed(team.getOnePointGamesPlayed() + 1);
+                            if (won) {
+                                team.setOnePointGamesWon(team.getOnePointGamesWon() + 1);
+                            }
                         }
-                        if (regularSeasonGameMatcher.group("outcome") != null) {
-                            log.debug("{} chalked up a {}", team.getName(), regularSeasonGameMatcher.group("outcome"));
+
+                        if (regularSeasonGameMatcher.group("overtime") != null) {
+//                            log.debug("Game was an overtime game");
                         }
                     }
+                    log.debug("{} played {} 1-point games and won {} of them", team.getName(), team.getOnePointGamesPlayed(), team.getOnePointGamesWon());
                 }
             }
         } else {
