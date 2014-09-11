@@ -179,10 +179,13 @@ public class BracketServiceImpl implements BracketService {
                 Matcher gameRowMatcher = gameRowPattern.matcher(line);
                 if (gameRowMatcher.matches()) {
                     // This regex gets every game row
-                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+).*?font\">(?<outcome>W|L)<.*?\">(?<winningScore>\\d+)-(?<losingScore>\\d+)<? ?\\d?(?<overtime>OT)?");
+                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">(?<tourneySeed>\\(\\d+\\) )?#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+).*?font\">(?<outcome>W|L)<.*?\">(?<winningScore>\\d+)-(?<losingScore>\\d+)<? ?\\d?(?<overtime>OT)?");
                     Matcher regularSeasonGameMatcher = regularSeasonGamePattern.matcher(line);
 
                     while (regularSeasonGameMatcher.find()) {
+                        if (regularSeasonGameMatcher.group("tourneySeed") != null) {
+                            break;
+                        }
                         if (regularSeasonGameMatcher.group("opponentId")          == null
                                 || regularSeasonGameMatcher.group("outcome")      == null
                                 || regularSeasonGameMatcher.group("winningScore") == null
@@ -211,11 +214,29 @@ public class BracketServiceImpl implements BracketService {
                             }
                         }
 
+                        // 2-Point Victories
+                        if (winningScore - losingScore == 2) {
+                            team.setTwoPointGamesPlayed(team.getTwoPointGamesPlayed() + 1);
+                            if (won) {
+                                team.setTwoPointGamesWon(team.getTwoPointGamesWon() + 1);
+                            }
+                        }
+
+                        // 3-Point Victories
+                        if (winningScore - losingScore == 3) {
+                            team.setThreePointGamesPlayed(team.getThreePointGamesPlayed() + 1);
+                            if (won) {
+                                team.setThreePointGamesWon(team.getThreePointGamesWon() + 1);
+                            }
+                        }
+
+                        // WYLO .... Create the RegularSeasonGame instance, but only after updating it to have a "won" member, and after updating Team so that "schedule" is just a list...
+
                         if (regularSeasonGameMatcher.group("overtime") != null) {
 //                            log.debug("Game was an overtime game");
                         }
                     }
-                    log.debug("{} played {} 1-point games and won {} of them", team.getName(), team.getOnePointGamesPlayed(), team.getOnePointGamesWon());
+                    log.debug("{} played {} 3-point games and won {} of them", team.getName(), team.getThreePointGamesPlayed(), team.getThreePointGamesWon());
                 }
             }
         } else {
