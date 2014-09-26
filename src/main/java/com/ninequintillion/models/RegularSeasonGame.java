@@ -7,5 +7,6 @@ public class RegularSeasonGame {
 
     private final Team opponent;
     private final int pointsAllowed;
+    private final boolean won;
 
 }

@@ -3,7 +3,7 @@ package com.ninequintillion.models;
 import lombok.Data;
 
 @Data
-public class Game {
+public class TournamentGame {
 
     private final Team firstTeam;
     private final Team secondTeam;

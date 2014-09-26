@@ -2,7 +2,7 @@ package com.ninequintillion.services;
 
 import com.ninequintillion.exceptions.BracketAnalysisException;
 import com.ninequintillion.models.BracketModel;
-import com.ninequintillion.models.Game;
+import com.ninequintillion.models.TournamentGame;
 import com.ninequintillion.models.RegularSeasonGame;
 import com.ninequintillion.models.Team;
 import org.apache.http.HttpEntity;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,7 @@ public class BracketServiceImpl implements BracketService {
     private HttpEntity entity;
     private BufferedReader bufferedReader;
     private String line;
-    private List<Game> gameList;
+    private List<TournamentGame> gameList;
     private Map<Integer, Team> teamMap;
 
     @Override
@@ -126,7 +125,7 @@ public class BracketServiceImpl implements BracketService {
 
                             Team winningTeam = Integer.parseInt(gameMatcher.group("firstScore")) > Integer.parseInt(gameMatcher.group("secondScore")) ? firstTeam : secondTeam;
 
-                            gameList.add(new Game(firstTeam, secondTeam, winningTeam));
+                            gameList.add(new TournamentGame(firstTeam, secondTeam, winningTeam));
                         }
 
                         break;
@@ -141,13 +140,14 @@ public class BracketServiceImpl implements BracketService {
             }
 
             // Load each team's "Schedule" page and gather the stats available thereon
-            for (Game tournamentGame : gameList) {
+            for (TournamentGame tournamentGame : gameList) {
                 if (tournamentGame.getFirstTeam().getSchedule() == null) {
                     getSchedulePage(tournamentGame.getFirstTeam());
                 }
                 if (tournamentGame.getSecondTeam().getSchedule() == null) {
                     getSchedulePage(tournamentGame.getSecondTeam());
                 }
+                // Set the Record Against Current ... but where? ... Perhaps on the TournamentGame instances themselves (firstTeamWinsAgainstSecond, secondTeamWinsAgainstFirst)
             }
         } finally {
             if (response != null) {
@@ -160,7 +160,7 @@ public class BracketServiceImpl implements BracketService {
     }
 
     private void getSchedulePage(Team team) throws BracketAnalysisException, IOException {
-        team.setSchedule(new HashMap<Integer, RegularSeasonGame>());
+        team.setSchedule(new ArrayList<RegularSeasonGame>());
 //        log.debug("Loading {}'s schedule page", team.getName());
         response.close();
         bufferedReader.close();
@@ -178,8 +178,8 @@ public class BracketServiceImpl implements BracketService {
                 Pattern gameRowPattern = Pattern.compile(".*?tr class=\"oddrow .*");
                 Matcher gameRowMatcher = gameRowPattern.matcher(line);
                 if (gameRowMatcher.matches()) {
-                    // This regex gets every game row
-                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">(?<tourneySeed>\\(\\d+\\) )?#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+).*?font\">(?<outcome>W|L)<.*?\">(?<winningScore>\\d+)-(?<losingScore>\\d+)<? ?\\d?(?<overtime>OT)?");
+                    // This regex gets every game row (except postseason games, which are explicitly skipped)
+                    Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">(?<tourneySeed>\\(\\d+\\) )?#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+).*?font\">(?<outcome>W|L)<.*?\">(?<winningScore>\\d+)-(?<losingScore>\\d+).*?(?<overtime>OT)?<\\/a");
                     Matcher regularSeasonGameMatcher = regularSeasonGamePattern.matcher(line);
 
                     while (regularSeasonGameMatcher.find()) {
@@ -230,19 +230,27 @@ public class BracketServiceImpl implements BracketService {
                             }
                         }
 
-                        // WYLO .... Create the RegularSeasonGame instance, but only after updating it to have a "won" member, and after updating Team so that "schedule" is just a list...
+                        // Prepare for Record Against Current and Average Points Allowed
+                        Team opponent = teamMap.get(opponentId) != null ? teamMap.get(opponentId) : new Team(-1, opponentId, "");
+                        int pointsAllowed = won ? losingScore : winningScore;
+                        team.getSchedule().add(new RegularSeasonGame(opponent, pointsAllowed, won));
 
+                        // Overtime Record
                         if (regularSeasonGameMatcher.group("overtime") != null) {
-//                            log.debug("Game was an overtime game");
+                            team.setOvertimeGamesPlayed(team.getOvertimeGamesPlayed() + 1);
+                            if (won) {
+                                team.setOvertimeGamesWon(team.getOvertimeGamesWon() + 1);
+                            }
                         }
                     }
-                    log.debug("{} played {} 3-point games and won {} of them", team.getName(), team.getThreePointGamesPlayed(), team.getThreePointGamesWon());
+                    // WYLO .... Set the Average Points Allowed
+                    log.debug("{} played {} overtime games and won {} of them", team.getName(), team.getOvertimeGamesPlayed(), team.getOvertimeGamesWon());
                 }
             }
         } else {
             throw new BracketAnalysisException("Error getting bracket response entity.");
         }
-        log.debug("\n\n ===== Next Team ===== \n");
+//        log.debug("\n\n ===== Next Team ===== \n");
     }
 
 }
