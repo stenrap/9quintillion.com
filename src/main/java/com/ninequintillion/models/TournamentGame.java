@@ -9,4 +9,8 @@ public class TournamentGame {
     private final Team secondTeam;
     private final Team winningTeam;
 
+    // Regular season wins (if they played each other in the regular season)
+    private int firstTeamWinsAgainstSecond;
+    private int secondTeamWinsAgainstFirst;
+
 }

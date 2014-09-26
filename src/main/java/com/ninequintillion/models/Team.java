@@ -30,16 +30,17 @@ public class Team {
     private String conference;
 
     /* Derived From Statistics Page */
-    private double pointsPerGame;
-    private double assistsPerGame;
-    private double stealsPerGame;
-    private double blocksPerGame;
-    private double turnoversPerGame;
+    private int gamesPlayed;  // Sometimes this differs from the schedule page, and all the numbers on the statistics page are based off this, so you can't use schedule.size()
     private double fieldGoalPercentage;
     private double freeThrowPercentage;
     private double threePointPercentage;
     private int totalPoints;
+    private double pointsPerGame;
     private int totalOffensiveRebounds;
     private int totalDefensiveRebounds;
+    private double assistsPerGame;
+    private double turnoversPerGame;
+    private double stealsPerGame;
+    private double blocksPerGame;
 
 }

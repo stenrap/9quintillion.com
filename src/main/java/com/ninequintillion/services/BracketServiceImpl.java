@@ -139,7 +139,7 @@ public class BracketServiceImpl implements BracketService {
                 throw new BracketAnalysisException("Error getting bracket response entity.");
             }
 
-            // Load each team's "Schedule" and "Statistics" pages and gather the stats available thereon
+            // Load each team's "Schedule" and "Statistics" pages, and gather the stats available thereon
             for (TournamentGame tournamentGame : gameList) {
                 if (tournamentGame.getFirstTeam().getSchedule() == null) {
                     getSchedulePage(tournamentGame.getFirstTeam());
@@ -147,9 +147,24 @@ public class BracketServiceImpl implements BracketService {
                 if (tournamentGame.getSecondTeam().getSchedule() == null) {
                     getSchedulePage(tournamentGame.getSecondTeam());
                 }
-                // TODO: Set the Record Against Current ... but where? ... Perhaps on the TournamentGame instances themselves (firstTeamWinsAgainstSecond, secondTeamWinsAgainstFirst)
 
-                // WYLO .... Load each team's "Statistics" page...
+                // Record Against Current
+                for (RegularSeasonGame regularSeasonGame : tournamentGame.getFirstTeam().getSchedule()) {
+                    if (regularSeasonGame.getOpponent().getId() == tournamentGame.getSecondTeam().getId()) {
+                        if (regularSeasonGame.isWon()) {
+                            tournamentGame.setFirstTeamWinsAgainstSecond(tournamentGame.getFirstTeamWinsAgainstSecond() + 1);
+                        } else {
+                            tournamentGame.setSecondTeamWinsAgainstFirst(tournamentGame.getSecondTeamWinsAgainstFirst() + 1);
+                        }
+                    }
+                }
+
+                if (tournamentGame.getFirstTeam().getGamesPlayed() == 0) {
+                    getStatisticsPage(tournamentGame.getFirstTeam());
+                }
+                if (tournamentGame.getSecondTeam().getGamesPlayed() == 0) {
+                    getStatisticsPage(tournamentGame.getSecondTeam());
+                }
             }
         } finally {
             if (response != null) {
@@ -163,7 +178,6 @@ public class BracketServiceImpl implements BracketService {
 
     private void getSchedulePage(Team team) throws BracketAnalysisException, IOException {
         team.setSchedule(new ArrayList<RegularSeasonGame>());
-//        log.debug("Loading {}'s schedule page", team.getName());
         response.close();
         bufferedReader.close();
         get = new HttpGet("http://espn.go.com/mens-college-basketball/team/schedule?id="+team.getId()+"&year="+year);
@@ -274,7 +288,37 @@ public class BracketServiceImpl implements BracketService {
                 }
             }
         } else {
-            throw new BracketAnalysisException("Error getting bracket response entity.");
+            throw new BracketAnalysisException("Error loading schedule page.");
+        }
+    }
+
+    private void getStatisticsPage(Team team) throws BracketAnalysisException, IOException {
+//        log.debug("Loading statistics page for {}", team.getName());
+        response.close();
+        bufferedReader.close();
+        get = new HttpGet("http://espn.go.com/mens-college-basketball/team/stats/_/id/"+team.getId()+"/year/"+year);
+        response = client.execute(get);
+        entity = response.getEntity();
+        if (entity != null) {
+            bufferedReader = new BufferedReader(new InputStreamReader(entity.getContent()));
+            while (true) {
+                line = bufferedReader.readLine();
+                if (line == null) {
+                    break;
+                }
+                // This regex finds the row containing the total number of games played
+                Pattern gamesPlayedPattern = Pattern.compile(".*?Totals<\\/td><td align=\"right\">(?<gamesPlayed>\\d+)<.*");
+                Matcher gamesPlayedMatcher = gamesPlayedPattern.matcher(line);
+                if (gamesPlayedMatcher.matches()) {
+                    team.setGamesPlayed(Integer.parseInt(gamesPlayedMatcher.group("gamesPlayed")));
+                    log.debug("{} played {} games", team.getName(), team.getGamesPlayed());
+                }
+
+                // WYLO .... This regex finds the row containing the rest of the statistics
+
+            }
+        } else {
+            throw new BracketAnalysisException("Error loading statistics page.");
         }
     }
 

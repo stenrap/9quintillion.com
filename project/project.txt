@@ -113,23 +113,38 @@ The analysis tool must:
 	
 	- Load each team's "Statistics" page for the specified year, parse the following statistics, and store them in that team's row:
 	
-		+ PPG (Points Per Game)
-		+ APG (Assists Per Game)
-		+ SPG (Steals Per Game)
-		+ BPG (Blocks Per Game)
-		+ TPG (Turnovers Per Game)
 		+ FG% (Field Goal Percentage)
 		+ FT% (Free Throw Percentage)
 		+ 3P% (Three Point Percentage)
 		+ PTS (Points (total))
+		+ PPG (Points Per Game)
 		+ OFR (Offensive Rebounds (total))
 		+ DFR (Defensive Rebounds (total))
+		+ APG (Assists Per Game)
+		+ TPG (Turnovers Per Game)
+		+ SPG (Steals Per Game)
+		+ BPG (Blocks Per Game)
 		
 		URL Examples:
 		
-			+ (2014) http://espn.go.com/mens-college-basketball/team/stats/_/id/57/year/2014/florida-gators
+			+ (2014) http://espn.go.com/mens-college-basketball/team/stats/_/id/57/year/2014
 			   ....                                                                       ^^
-			+ (2002) http://espn.go.com/mens-college-basketball/team/stats/_/id/57/year/2002/florida-gators
+			+ (2002) http://espn.go.com/mens-college-basketball/team/stats/_/id/57/year/2002
+
+
+	====
+
+		Actual HTML of the row containing the total number of games played:
+
+			<td>Totals</td><td align="right">31</td>
+
+		Actual HTML of the row containing the stats we will extract and calculate:
+
+			<td>Totals</td><td align="right">--</td><td align="right">892</td><td align="right">1899</td><td align="right">479</td><td align="right">687</td><td align="right">232</td><td align="right">658</td><td align="right">2495</td><td align="right">430</td><td align="right">773</td><td align="right">1203</td><td align="right">519</td><td align="right">463</td><td align="right">307</td><td align="right">141</td></tr>
+			                                                          FGM                       FGA                        FTM                       FTA                       3PM                       3PA                       PTS                        OFR                       DFR                       TREB*                      AST                       TO                        STL                       BLK                        
+
+	====
+
 	
 	- Display a table of all the above statistics for each winning team (so there should be 63 rows). In each row, indicate whether
 	  the winning team was better or worse for each statistic. This *should* allow you to visually determine what the weight of each
