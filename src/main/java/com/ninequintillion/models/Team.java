@@ -2,7 +2,6 @@ package com.ninequintillion.models;
 
 import lombok.Data;
 
-import java.net.URL;
 import java.util.List;
 
 @Data
@@ -23,12 +22,11 @@ public class Team {
     private int threePointGamesWon;
     private int overtimeGamesPlayed;
     private int overtimeGamesWon;
-    private int winsAgainstCurrent;
-    private int lossesAgainstCurrent;
-    private int tiesAgainstCurrent;
     private int gamesAgainstRanked;
     private int winsAgainstRanked;
     private double averagePointsAllowed;
+    private int wins;
+    private int losses;
     private String conference;
 
     /* Derived From Statistics Page */

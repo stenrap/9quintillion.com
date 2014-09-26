@@ -139,7 +139,7 @@ public class BracketServiceImpl implements BracketService {
                 throw new BracketAnalysisException("Error getting bracket response entity.");
             }
 
-            // Load each team's "Schedule" page and gather the stats available thereon
+            // Load each team's "Schedule" and "Statistics" pages and gather the stats available thereon
             for (TournamentGame tournamentGame : gameList) {
                 if (tournamentGame.getFirstTeam().getSchedule() == null) {
                     getSchedulePage(tournamentGame.getFirstTeam());
@@ -147,7 +147,9 @@ public class BracketServiceImpl implements BracketService {
                 if (tournamentGame.getSecondTeam().getSchedule() == null) {
                     getSchedulePage(tournamentGame.getSecondTeam());
                 }
-                // Set the Record Against Current ... but where? ... Perhaps on the TournamentGame instances themselves (firstTeamWinsAgainstSecond, secondTeamWinsAgainstFirst)
+                // TODO: Set the Record Against Current ... but where? ... Perhaps on the TournamentGame instances themselves (firstTeamWinsAgainstSecond, secondTeamWinsAgainstFirst)
+
+                // WYLO .... Load each team's "Statistics" page...
             }
         } finally {
             if (response != null) {
@@ -181,6 +183,8 @@ public class BracketServiceImpl implements BracketService {
                     // This regex gets every game row (except postseason games, which are explicitly skipped)
                     Pattern regularSeasonGamePattern = Pattern.compile("class=\"team-name\">(?<tourneySeed>\\(\\d+\\) )?#?(?<opponentRank>\\d+)? ?.*?_/id/(?<opponentId>\\d+).*?font\">(?<outcome>W|L)<.*?\">(?<winningScore>\\d+)-(?<losingScore>\\d+).*?(?<overtime>OT)?<\\/a");
                     Matcher regularSeasonGameMatcher = regularSeasonGamePattern.matcher(line);
+
+                    int totalPointsAllowed = 0;
 
                     while (regularSeasonGameMatcher.find()) {
                         if (regularSeasonGameMatcher.group("tourneySeed") != null) {
@@ -242,15 +246,36 @@ public class BracketServiceImpl implements BracketService {
                                 team.setOvertimeGamesWon(team.getOvertimeGamesWon() + 1);
                             }
                         }
+
+                        // Prepare for Average Points Allowed
+                        totalPointsAllowed += pointsAllowed;
+
+                        // Wins and Losses
+                        if (won) {
+                            team.setWins(team.getWins() + 1);
+                        } else {
+                            team.setLosses(team.getLosses() + 1);
+                        }
                     }
-                    // WYLO .... Set the Average Points Allowed
-                    log.debug("{} played {} overtime games and won {} of them", team.getName(), team.getOvertimeGamesPlayed(), team.getOvertimeGamesWon());
+
+                    // Average Points Allowed
+                    team.setAveragePointsAllowed((double) totalPointsAllowed / team.getSchedule().size());
+//                    log.debug("{} allowed an average of {} points per game", team.getName(), team.getAveragePointsAllowed());
+                }
+
+                // Conference
+                if (team.getConference() == null) {
+                    Pattern conferencePattern = Pattern.compile(".*?div class=\"sub-title\">(?<conference>.*?)</div.*");
+                    Matcher conferenceMatcher = conferencePattern.matcher(line);
+                    if (conferenceMatcher.matches() && conferenceMatcher.group("conference") != null) {
+                        team.setConference(conferenceMatcher.group("conference"));
+//                        log.debug("{} is in the {}", team.getName(), team.getConference());
+                    }
                 }
             }
         } else {
             throw new BracketAnalysisException("Error getting bracket response entity.");
         }
-//        log.debug("\n\n ===== Next Team ===== \n");
     }
 
 }
