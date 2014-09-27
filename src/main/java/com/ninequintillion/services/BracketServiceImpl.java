@@ -165,6 +165,8 @@ public class BracketServiceImpl implements BracketService {
                 if (tournamentGame.getSecondTeam().getGamesPlayed() == 0) {
                     getStatisticsPage(tournamentGame.getSecondTeam());
                 }
+
+                // WYLO .... Figure out what to stick in the bracket model, then display a table of 63 rows (one for each game) highlighting the stats where the winning team was better
             }
         } finally {
             if (response != null) {
@@ -315,18 +317,36 @@ public class BracketServiceImpl implements BracketService {
                 }
 
                 // WYLO .... This regex finds the row containing the rest of the statistics
-                Pattern statsPattern = Pattern.compile(".*?Totals<\\/td><td align=\"right\">--<.*?>(?<FGM>\\d+)<.*?>(?<FGA>\\d+)<.*?>(?<FTM>\\d+)<.*?>(?<FTA>\\d+)<.*");
+                Pattern statsPattern = Pattern.compile(".*?Totals<\\/td><td align=\"right\">--<.*?>(?<FGM>\\d+)<.*?>(?<FGA>\\d+)<.*?>(?<FTM>\\d+)<.*?>(?<FTA>\\d+)<.*?>(?<TPM>\\d+)<.*?>(?<TPA>\\d+)<.*?>(?<PTS>\\d+)<.*?>(?<OFR>\\d+)<.*?>(?<DFR>\\d+)<.*?>\\d+<.*?>(?<AST>\\d+)<.*?>(?<TO>\\d+)<.*?>(?<STL>\\d+)<.*?>(?<BLK>\\d+)<.*");
                 Matcher statsMatcher = statsPattern.matcher(line);
                 if (statsMatcher.matches()) {
                     if (statsMatcher.group("FGM") == null
                             || statsMatcher.group("FGA") == null
                             || statsMatcher.group("FTM") == null
-                            || statsMatcher.group("FTA") == null) {
+                            || statsMatcher.group("FTA") == null
+                            || statsMatcher.group("TPM") == null
+                            || statsMatcher.group("TPA") == null
+                            || statsMatcher.group("PTS") == null
+                            || statsMatcher.group("OFR") == null
+                            || statsMatcher.group("DFR") == null
+                            || statsMatcher.group("AST") == null
+                            || statsMatcher.group("TO") == null
+                            || statsMatcher.group("STL") == null
+                            || statsMatcher.group("BLK") == null) {
                         throw new BracketAnalysisException("Error parsing statistics page.");
                     }
                     team.setFieldGoalPercentage((double) Integer.parseInt(statsMatcher.group("FGM")) / Integer.parseInt(statsMatcher.group("FGA")));
                     team.setFreeThrowPercentage((double) Integer.parseInt(statsMatcher.group("FTM")) / Integer.parseInt(statsMatcher.group("FTA")));
-                    log.debug("{} made {} of its free throws", team.getName(), team.getFreeThrowPercentage() * 100);
+                    team.setThreePointPercentage((double) Integer.parseInt(statsMatcher.group("TPM")) / Integer.parseInt(statsMatcher.group("TPA")));
+                    team.setTotalPoints(Integer.parseInt(statsMatcher.group("PTS")));
+                    team.setPointsPerGame((double) team.getTotalPoints() / team.getGamesPlayed());
+                    team.setTotalOffensiveRebounds(Integer.parseInt(statsMatcher.group("OFR")));
+                    team.setTotalDefensiveRebounds(Integer.parseInt(statsMatcher.group("DFR")));
+                    team.setAssistsPerGame((double) Integer.parseInt(statsMatcher.group("AST")) / team.getGamesPlayed());
+                    team.setTurnoversPerGame((double) Integer.parseInt(statsMatcher.group("TO")) / team.getGamesPlayed());
+                    team.setStealsPerGame((double) Integer.parseInt(statsMatcher.group("STL")) / team.getGamesPlayed());
+                    team.setBlocksPerGame((double) Integer.parseInt(statsMatcher.group("BLK")) / team.getGamesPlayed());
+//                    log.debug("{} had {} STL and {} BLK", team.getName(), team.getStealsPerGame(), team.getBlocksPerGame());
                 }
             }
         } else {
