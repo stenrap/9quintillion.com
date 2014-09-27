@@ -311,11 +311,23 @@ public class BracketServiceImpl implements BracketService {
                 Matcher gamesPlayedMatcher = gamesPlayedPattern.matcher(line);
                 if (gamesPlayedMatcher.matches()) {
                     team.setGamesPlayed(Integer.parseInt(gamesPlayedMatcher.group("gamesPlayed")));
-                    log.debug("{} played {} games", team.getName(), team.getGamesPlayed());
+//                    log.debug("{} played {} games", team.getName(), team.getGamesPlayed());
                 }
 
                 // WYLO .... This regex finds the row containing the rest of the statistics
-
+                Pattern statsPattern = Pattern.compile(".*?Totals<\\/td><td align=\"right\">--<.*?>(?<FGM>\\d+)<.*?>(?<FGA>\\d+)<.*?>(?<FTM>\\d+)<.*?>(?<FTA>\\d+)<.*");
+                Matcher statsMatcher = statsPattern.matcher(line);
+                if (statsMatcher.matches()) {
+                    if (statsMatcher.group("FGM") == null
+                            || statsMatcher.group("FGA") == null
+                            || statsMatcher.group("FTM") == null
+                            || statsMatcher.group("FTA") == null) {
+                        throw new BracketAnalysisException("Error parsing statistics page.");
+                    }
+                    team.setFieldGoalPercentage((double) Integer.parseInt(statsMatcher.group("FGM")) / Integer.parseInt(statsMatcher.group("FGA")));
+                    team.setFreeThrowPercentage((double) Integer.parseInt(statsMatcher.group("FTM")) / Integer.parseInt(statsMatcher.group("FTA")));
+                    log.debug("{} made {} of its free throws", team.getName(), team.getFreeThrowPercentage() * 100);
+                }
             }
         } else {
             throw new BracketAnalysisException("Error loading statistics page.");
