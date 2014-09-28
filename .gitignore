@@ -3,3 +3,4 @@ Thumbs.db
 target/**
 .idea/**
 *.iml
+~*.xlsx

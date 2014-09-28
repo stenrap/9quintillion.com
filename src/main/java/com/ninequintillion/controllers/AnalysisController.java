@@ -39,10 +39,7 @@ public class AnalysisController {
 
         // TODO: Make sure the POSTed password matches the hashedPassword
 
-        BracketModel bracketModel = bracketService.parseBracket(startAnalysisModel.getYear(), false);
-
-        ModelAndView modelAndView = new ModelAndView("analysis/result");
-        modelAndView.addObject("result", startAnalysisModel);
+        ModelAndView modelAndView = new ModelAndView("analysis/result", "bracketModel", bracketService.parseBracket(startAnalysisModel.getYear(), false));
         return modelAndView;
     }
 

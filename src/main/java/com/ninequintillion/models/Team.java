@@ -14,6 +14,8 @@ public class Team {
 
     /* Derived From Schedule Page */
     private List<RegularSeasonGame> schedule;
+    private int gamesAgainstRanked;
+    private int winsAgainstRanked;
     private int onePointGamesPlayed;
     private int onePointGamesWon;
     private int twoPointGamesPlayed;
@@ -22,8 +24,6 @@ public class Team {
     private int threePointGamesWon;
     private int overtimeGamesPlayed;
     private int overtimeGamesWon;
-    private int gamesAgainstRanked;
-    private int winsAgainstRanked;
     private double averagePointsAllowed;
     private int wins;
     private int losses;

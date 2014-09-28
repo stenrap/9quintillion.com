@@ -9,8 +9,105 @@
     <link href="resources/css/9quintillion.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <div id="content">
-        The result is ... $1,000,000,000 (and {{#result}}{{year}}{{/result}})!
+    <div id="analysis-content">
+        {{#bracketModel}}
+        <table>
+            <tr>
+                <th>Seed</th>
+                <th>Name</th>
+                <th>GAR</th>
+                <th>VAR</th>
+                <th>1PG</th>
+                <th>1PW</th>
+                <th>2PG</th>
+                <th>2PW</th>
+                <th>3PG</th>
+                <th>3PW</th>
+                <th>OTG</th>
+                <th>OTW</th>
+                <th>APA</th>
+                <th>W</th>
+                <th>L</th>
+                <th>CON</th>
+                <th>FG%</th>
+                <th>FT%</th>
+                <th>3P%</th>
+                <th>PPG</th>
+                <th>OFR</th>
+                <th>DFR</th>
+                <th>APG</th>
+                <th>TPG</th>
+                <th>SPG</th>
+                <th>BPG</th>
+                <th>WAC</th>
+            </tr>
+            {{#gameList}}
+            <tr class="{{firstTeamCssClass}}">
+                {{#firstTeam}}
+                <td>{{seed}}</td>
+                <td>{{name}}</td>
+                <td>{{gamesAgainstRanked}}</td>
+                <td>{{winsAgainstRanked}}</td>
+                <td>{{onePointGamesPlayed}}</td>
+                <td>{{onePointGamesWon}}</td>
+                <td>{{twoPointGamesPlayed}}</td>
+                <td>{{twoPointGamesWon}}</td>
+                <td>{{threePointGamesPlayed}}</td>
+                <td>{{threePointGamesWon}}</td>
+                <td>{{overtimeGamesPlayed}}</td>
+                <td>{{overtimeGamesWon}}</td>
+                <td>{{averagePointsAllowed}}</td>
+                <td>{{wins}}</td>
+                <td>{{losses}}</td>
+                <td>{{conference}}</td>
+                <td>{{fieldGoalPercentage}}</td>
+                <td>{{freeThrowPercentage}}</td>
+                <td>{{threePointPercentage}}</td>
+                <td>{{pointsPerGame}}</td>
+                <td>{{totalOffensiveRebounds}}</td>
+                <td>{{totalDefensiveRebounds}}</td>
+                <td>{{assistsPerGame}}</td>
+                <td>{{turnoversPerGame}}</td>
+                <td>{{stealsPerGame}}</td>
+                <td>{{blocksPerGame}}</td>
+                {{/firstTeam}}
+                <td>{{firstTeamWinsAgainstSecond}}</td>
+            </tr>
+            <tr class="{{secondTeamCssClass}}">
+                {{#secondTeam}}
+                <td>{{seed}}</td>
+                <td>{{name}}</td>
+                <td>{{gamesAgainstRanked}}</td>
+                <td>{{winsAgainstRanked}}</td>
+                <td>{{onePointGamesPlayed}}</td>
+                <td>{{onePointGamesWon}}</td>
+                <td>{{twoPointGamesPlayed}}</td>
+                <td>{{twoPointGamesWon}}</td>
+                <td>{{threePointGamesPlayed}}</td>
+                <td>{{threePointGamesWon}}</td>
+                <td>{{overtimeGamesPlayed}}</td>
+                <td>{{overtimeGamesWon}}</td>
+                <td>{{averagePointsAllowed}}</td>
+                <td>{{wins}}</td>
+                <td>{{losses}}</td>
+                <td>{{conference}}</td>
+                <td>{{fieldGoalPercentage}}</td>
+                <td>{{freeThrowPercentage}}</td>
+                <td>{{threePointPercentage}}</td>
+                <td>{{pointsPerGame}}</td>
+                <td>{{totalOffensiveRebounds}}</td>
+                <td>{{totalDefensiveRebounds}}</td>
+                <td>{{assistsPerGame}}</td>
+                <td>{{turnoversPerGame}}</td>
+                <td>{{stealsPerGame}}</td>
+                <td>{{blocksPerGame}}</td>
+                {{/secondTeam}}
+                <td>{{secondTeamWinsAgainstFirst}}</td>
+            </tr>
+            <tr class="spacer-row"></tr>
+            {{/gameList}}
+        </table>
+        {{/bracketModel}}
     </div>
 </body>
 </html>

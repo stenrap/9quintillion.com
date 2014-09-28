@@ -166,7 +166,13 @@ public class BracketServiceImpl implements BracketService {
                     getStatisticsPage(tournamentGame.getSecondTeam());
                 }
 
-                // WYLO .... Figure out what to stick in the bracket model, then display a table of 63 rows (one for each game) highlighting the stats where the winning team was better
+                if (tournamentGame.getWinningTeam() == tournamentGame.getFirstTeam()) {
+                    tournamentGame.setFirstTeamCssClass("analysis-winner");
+                    tournamentGame.setSecondTeamCssClass("analysis-loser");
+                } else {
+                    tournamentGame.setFirstTeamCssClass("analysis-loser");
+                    tournamentGame.setSecondTeamCssClass("analysis-winner");
+                }
             }
         } finally {
             if (response != null) {
@@ -175,6 +181,7 @@ public class BracketServiceImpl implements BracketService {
             }
         }
 
+        bracketModel.setGameList(gameList);
         return bracketModel;
     }
 

@@ -13,4 +13,7 @@ public class TournamentGame {
     private int firstTeamWinsAgainstSecond;
     private int secondTeamWinsAgainstFirst;
 
+    private String firstTeamCssClass;
+    private String secondTeamCssClass;
+
 }
